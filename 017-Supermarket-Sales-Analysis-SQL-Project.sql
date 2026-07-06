@@ -11,24 +11,12 @@ CREATE TABLE salestable (
     PRIMARY KEY(`orderId`)
 );
 
-LOAD DATA LOCAL INFILE 'C:/Users/billy/OneDrive/Desktop/New Dataset/salesAnalysis/salesAnalysis.csv'
-INTO TABLE salestable
-FIELDS TERMINATED BY ','
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES;
-
 CREATE TABLE productstable (
 	`productId`INT NOT NULL,
     `productName` VARCHAR(50) NOT NULL,
     `category` VARCHAR(50) NOT NULL,
     PRIMARY KEY(`productId`)
 );
-
-LOAD DATA LOCAL INFILE 'C:/Users/billy/OneDrive/Desktop/New Dataset/salesAnalysis/products.csv'
-INTO TABLE productstable
-FIELDS TERMINATED BY ','
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES;
 
 CREATE TABLE customerTable (
 	`customerId` INT NOT NULL,
@@ -39,15 +27,10 @@ CREATE TABLE customerTable (
     PRIMARY KEY (`customerId`)
 );
 
-LOAD DATA LOCAL INFILE 'C:/Users/billy/OneDrive/Desktop/New Dataset/salesAnalysis/customers.csv'
-INTO TABLE customerTable
-FIELDS TERMINATED BY ','
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES;
-
 
 -- SALES PERFORMANCE ANALYSIS
 -- 1. Which products generate the highest total revenue?
+
 SELECT
 	st.productId,
     pt.productName,
@@ -58,6 +41,7 @@ JOIN productstable pt
 ORDER BY totalRevenue DESC;
 
 -- 2. Which products have the lowest sales performance?
+
 SELECT
 	st.productId,
     pt.productName,
@@ -68,6 +52,7 @@ JOIN productstable pt
 ORDER BY totalRevenue ASC;
 
 -- 3. What are the monthly sales trends of the company?
+
 SELECT
     YEAR(date) AS years,
     MONTH(date) AS monthNum,
@@ -78,6 +63,7 @@ GROUP BY YEAR(date), MONTH(date), MONTHNAME(date)
 ORDER BY years, monthNum;
 
 -- 4. Which month has the highest sales?
+
 SELECT
     YEAR(date) AS years,
     MONTH(date) AS monthNum,
@@ -88,6 +74,7 @@ GROUP BY YEAR(date), MONTH(date), MONTHNAME(date)
 ORDER BY years, totalRevenue DESC;
 
 -- 5. What is the average order value per month?
+
 SELECT
 	YEAR(date) AS years,
 	MONTH(date) AS monthNum,
@@ -98,6 +85,7 @@ GROUP BY YEAR(date), MONTH(date), MONTHNAME(date)
 ORDER BY years, monthNum;
 
 -- 6. Are sales growing or declining month-over-month?
+
 WITH monthlySales AS (
     SELECT 
         DATE_FORMAT(date, '%Y-%m') AS month,
@@ -123,6 +111,7 @@ ORDER BY month;
 
 
 -- 7. Which products show consistent monthly growth?
+
 WITH monthlyProductSales AS (
     SELECT 
         p.productName,
@@ -151,6 +140,7 @@ FROM growthAnalysis
 ORDER BY productName, month;
 
 -- 8. Which products are seasonal?
+
 WITH monthlyProductSales AS (
     SELECT 
         p.productName,
@@ -171,6 +161,7 @@ GROUP BY productName
 ORDER BY salesFluctuation DESC;
 
 -- 9. Which categories contribute the most revenue?
+
 SELECT
     pt.category,
     SUM(st.quantity * st.unitPrice) AS totalRevenue
@@ -181,6 +172,7 @@ GROUP BY pt.category
 ORDER BY totalRevenue DESC;
 
 -- 10. Which categories are underperforming?
+
 SELECT
     pt.category,
     SUM(st.quantity * st.unitPrice) AS totalRevenue
@@ -192,6 +184,7 @@ ORDER BY totalRevenue ASC;
 
 -- PRODUCT ANALYSIS
 -- 11. Which products are frequently purchased in high quantities?
+
 SELECT
     pt.category,
     SUM(st.quantity) AS totalQuantities
@@ -201,7 +194,8 @@ ON st.productId = pt.productId
 GROUP BY pt.category
 ORDER BY totalQuantities DESC;
 
--- 12. Which products have declining demand over time?]
+-- 12. Which products have declining demand over time?
+
 WITH monthlyProductDemand AS (
 	SELECT 
 		pt.productName,
@@ -230,6 +224,7 @@ GROUP BY productName
 ORDER BY decliningMonths DESC;
 
 -- 13. Which products contribute most to total quantity sold?
+
 SELECT
     pt.productName,
     SUM(quantity) AS totalQuantitySold
@@ -240,6 +235,7 @@ GROUP BY pt.productName
 ORDER BY totalQuantitySold DESC;
 
 -- 14 Which categories are growing the fastest?
+
 WITH monthlyCategorySales AS (
     SELECT
         p.category,
@@ -273,6 +269,7 @@ ORDER BY avgGrowthRate DESC;
 
 
 -- 15. Which products should the company promote more aggressively?
+
 SELECT
     p.productName,
     p.category,
@@ -293,7 +290,8 @@ HAVING totalQuantitySold < (
 ORDER BY totalRevenue DESC;
 
 
--- 16. Which products should the company consider discontinuing?3
+-- 16. Which products should the company consider discontinuing?
+
 SELECT
 	productName,
     category,
@@ -306,6 +304,7 @@ GROUP BY productName, category
 ORDER BY totalRevenue ASC, totalQuantitySold ASC;
 
 -- 17. Which products have stable demand across all months?
+
 SELECT	
 	DATE_FORMAT(s.date, '%Y-%m') AS month,
 	productName,
@@ -319,6 +318,7 @@ ORDER BY productName, category, month;
 
 -- CUSTOMER ANALYSIS
 -- 18. Which customers generate the highest revenue?
+
 SELECT
 	c.customerId,
     customerName,
@@ -330,6 +330,7 @@ GROUP BY c.customerId, customerName
 ORDER BY totalRevenue DESC;
 
 -- 19. Which regions have the highest number of customers?
+
 SELECT
 	region,
     COUNT(*) AS totalCount
@@ -338,6 +339,7 @@ GROUP BY region
 ORDER BY totalCount DESC;
 
 -- 20. Which customer age group spends the most money? 
+
 SELECT 
     CASE
         WHEN c.age BETWEEN 18 AND 25 THEN '18-25'
@@ -356,6 +358,7 @@ GROUP BY ageGroup
 ORDER BY ageGroup;
 
 -- 21. Do male or female customers purchase more products?
+
 SELECT
 	c.gender,
     SUM(s.quantity) AS totalPurchase
@@ -365,6 +368,7 @@ JOIN customertable c
 GROUP BY c.gender;
 
 -- 22. Which region has the highest sales revenue?
+
 SELECT
 	c.region,
     ROUND(SUM(quantity * unitPrice),2) AS totalRevenue
@@ -375,6 +379,7 @@ GROUP BY c.region
 ORDER BY totalRevenue DESC;
 
 -- 23. What is the average spending per customer?
+
 SELECT
 	ROUND(AVG(customerSpending),2) AS avgCustomerTotalSpending
 FROM (
@@ -385,6 +390,7 @@ FROM (
         GROUP BY customerId ) customerTotalSpending;
         
 -- 24. Which customers purchase most frequently?
+
 SELECT
 	s.customerId,
     c.customerName,
@@ -397,6 +403,7 @@ ORDER BY totalNumberOfPurchase DESC;
 
 -- REGIONAL BUSINESS ANALYSIS
 -- 25. Which region generates the highest average order value?
+
 SELECT
 	c.region,
     SUM(quantity * unitPrice) AS salesRevenue
@@ -407,6 +414,7 @@ GROUP BY c.region
 ORDER by salesRevenue DESC;
 
 -- 26. Which regions have low sales but high customer counts?
+
 SELECT
 	c.region,
     COUNT(c.customerId) AS customerCount,
@@ -420,6 +428,7 @@ ORDER by salesRevenue ASC;
 
 -- EMPLOYEE / SALES PERFORMANCE
 -- 27. Which employees generate the highest revenue?
+
 SELECT
 	employeeId,
     SUM(quantity * unitPrice) AS totalRevenue
@@ -428,6 +437,7 @@ GROUP BY employeeId
 ORDER BY totalRevenue DESC;
 
 -- 28. Which employees process the most orders?
+
 SELECT
 	employeeId,
     SUM(quantity ) AS totalQuantity
@@ -437,6 +447,7 @@ ORDER BY totalQuantity DESC;
 
 
 -- 29. Is there a relationship between price and quantity sold?
+
 SELECT 
     ROUND((COUNT(*) * SUM(unitPrice * quantity) -
             SUM(unitPrice) * SUM(quantity))
@@ -449,6 +460,7 @@ SELECT
 FROM salestable;
 
 -- 30. What factors most influence total sales revenue?
+
 SELECT 
     p.category,
     c.region,
